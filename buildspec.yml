@@ -7,6 +7,7 @@ phases:
       - sed -i "s/AWS::ACCOUNT_ID/$AWS_ACCOUNT_ID/g" swagger.yaml
       - sed -i "s/AWS::CUSTOM_AUTHORIZER_LAMBDA_NAME/$CUSTOM_AUTHORIZER_LAMBDA_NAME/g" swagger.yaml
       - sed -i "s/AWS::CUSTOM_AUTHORIZER_ROLE_NAME/$CUSTOM_AUTHORIZER_ROLE_NAME/g" swagger.yaml
+      - sed -i "s/AWS::APIGATEWAY_INVOKE_LAMBDA_ROLE_NAME/$CUSTOM_AUTHORIZER_ROLE_NAME/g" swagger.yaml
       - cd src; npm install; cd ..
       - aws cloudformation package
          --template-file ./template.yaml
