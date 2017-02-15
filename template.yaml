@@ -85,7 +85,7 @@ Resources:
   ApiGatewayApi:
     Type: AWS::Serverless::Api
     Properties:
-      DefinitionUri: ../swagger.yaml
+      DefinitionUri: ./swagger.yaml
       StageName: Prod
       Variables:
         LambdaFunctionName: !Ref ProxyFunction
@@ -94,7 +94,7 @@ Resources:
     Properties:
       Handler: index.handler
       Runtime: nodejs4.3
-      CodeUri: ../src
+      CodeUri: ./src
       Role: !GetAtt LambdaFunctionIAMRole.Arn
       Timeout: 300
       Environment:
