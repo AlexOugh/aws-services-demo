@@ -1,0 +1,75 @@
+
+'use strict';
+
+exports.handler = (event, context) => {
+
+  console.log('Received event:', JSON.stringify(event, null, 2));
+
+  var method = event.httpMethod.toLowerCase();
+  var paths = event.path.split('/');
+  var path = paths[paths.length-1];
+  var queryParams = event.queryStringParameters;
+  var postData = (event.body) ? event.body : null;
+  if (postData && typeof(postData) == "string") postData = JSON.parse(postData);
+  var authorizer = (event.requestContext) ? event.requestContext.authorizer: null;
+
+  var credentials = null;
+  if (event.headers.Credentials) {
+    credentials = JSON.parse(new Buffer(event.headers.Credentials, 'base64').toString())
+  }
+  console.log(credentials);
+
+  try {
+    var params = postData;
+    if (method == 'get') params = queryParams;
+    params['Credentials'] = credentials;
+    this[method](params, function(err, data) {
+      if (err) {
+        console.log(err);
+        sendFailureResponse({error: 'not permitted'}, 403, context, authorizer, resType);
+      }
+      else {
+        console.log(data);
+        sendSuccessResponse(data, context, authorizer, resType);
+      }
+    });
+  }
+  catch(err) {
+    console.log(err);
+    sendNotPermittedMethodResponse(event.path, event.httpMethod, context, authorizer, resType);
+  }
+}
+
+function sendNotPermittedMethodResponse(path, method, context, authorizer, resType) {
+  var responseBody = {error: "not permitted method " + method + " in " + path};
+  var statusCode = 404;
+  sendResponse(responseBody, statusCode, context, authorizer, resType);
+}
+
+function sendNotFoundResponse(path, method, context, authorizer, resType) {
+  var responseBody = {error: "invalid path " + path};
+  var statusCode = 404;
+  sendResponse(responseBody, statusCode, context, authorizer, resType);
+}
+
+function sendSuccessResponse(retValue, context, authorizer, resType) {
+  var responseBody = retValue;
+  var statusCode = 200;
+  sendResponse(responseBody, statusCode, context, authorizer, resType);
+}
+
+function sendFailureResponse(err, statusCode, context, authorizer, resType) {
+  var responseBody = err;
+  sendResponse(responseBody, statusCode, context, authorizer, resType);
+}
+
+function sendResponse(responseBody, statusCode, context, authorizer, resType) {
+  if (authorizer) responseBody['__authorizer'] = authorizer
+  var response = {
+      statusCode: statusCode,
+  };
+  response['headers'] = { "Access-Control-Allow-Origin": "*" };
+  response['body'] = JSON.stringify(responseBody);
+  console.log("response: " + JSON.stringify(response))
+  context.succeed(response);
+}
