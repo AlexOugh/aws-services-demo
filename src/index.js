@@ -1,22 +1,23 @@
 
 var baseHandler = require('./base_handler.js')
+var AWS = require('aws-sdk');
 
 exports.handler = (event, context) => {
   baseHandler.handler(event, context);
 }
 
-post: function(params) {
+baseHandler.post = function(params) {
 
-  let kmsRegion = process.env.BUCKET_REGION;
-  let redshiftConnectionString = process.env.REDSHIFT_CONNECTION_STRING;
-  let redshiftUser = process.env.REDSHIFT_USER;
-  let redshiftPass = process.env.REDSHIFT_PASS;
+  var kmsRegion = process.env.BUCKET_REGION;
+  var redshiftConnectionString = process.env.REDSHIFT_CONNECTION_STRING;
+  var redshiftUser = process.env.REDSHIFT_USER;
+  var redshiftPass = process.env.REDSHIFT_PASS;
 
-  var input = {
-    region: kmsRegion,
-    password: redshiftPass
+  var kms = new AWS.KMS({region: kmsRegion});
+  var params = {
+    CiphertextBlob: new Buffer(redshiftPass, 'base64')
   };
-  return kms.decrypt(input).then(function(data) {
+  return kms.decrypt(params).then(function(data) {
     redshiftPass = data.Plaintext.toString();
     redshiftConnectionString = 'pg:' + redshiftUser + ':' + redshiftPass + '@' + redshiftConnectionString;
   }).then(function() {
