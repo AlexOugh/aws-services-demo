@@ -29,7 +29,7 @@ Input Parameter Values
 
 - EncryptionLambdaName:
 
-  Enter value `ONLY when there is one or more Environment Variables to be encrypted` in the target Lambda Functions(s). This is the `NAME (not ARN) of the encryption Lambda Function`. (See <a href="https://github.com/SungardAS/aws-services-encryption">here</a> for the Lambda Function Project to Encrypt Environment Variables)
+  Enter the `NAME (not ARN) of the encryption Lambda Function`. If you didn't already deployed the Encryption Lambda Function, see <a href="https://github.com/SungardAS/aws-services-encryption">here</a> to deploy the Lambda Function to Encrypt Environment Variables.
 
 - GitHubPersonalAccessToken:
 
@@ -44,6 +44,20 @@ Input Parameter Values
 - ParameterOverrides: `{ "SecretValue": "needs-to-be-encrypted" }`
 
 - ProjectImage: `aws/codebuild/nodejs:4.3.2`
+
+## How To Send API Calls
+
+Wait until the CodePipeline successfully completed creating the target stack, "SungardAS-aws-services-demo".
+
+Before run the API calls, first confirm that "SecretValue" Environment Variable of the target Lambda Function is encrypted in Lambda console even if we just provided a raw string, "needs-to-be-encrypted". (You can get the target Lambda ARN from "ProxyLambdaFunctionArn" in the "Outputs" tab of the stack)
+
+Once confirmed, copy the value of "ApiUrl" in the "Outputs" tab and send a request as below. (Don't forget to set the header if you entered the value of "CustomAuthorizerLambdaName")
+
+  - URL: `<ApiUrl>/decrypt`
+
+  - METHOD: `GET`
+
+You will receive `{"decrypted":"needs-to-be-encrypted"}` as a success response.
 
 ## How To Test Lambda Functions
 
