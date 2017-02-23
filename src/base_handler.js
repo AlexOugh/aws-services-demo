@@ -26,7 +26,7 @@ exports.handler = (event, context) => {
     this[method](params, function(err, data) {
       if (err) {
         console.log(err);
-        sendFailureResponse({error: 'not permitted'}, 403, context, authorizer);
+        sendFailureResponse({error: err}, 200, context, authorizer);
       }
       else {
         console.log(data);
